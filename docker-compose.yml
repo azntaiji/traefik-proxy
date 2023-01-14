@@ -6,12 +6,11 @@ services:
       #- "--log.level=DEBUG"
       - "--api.insecure=true"
       - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.exposedbydefault=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
       - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
-      #- "--certificatesresolvers.myresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
       - "--certificatesresolvers.myresolver.acme.email=zach@steelhead.design"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
@@ -25,8 +24,18 @@ services:
     volumes:
       - ./letsencrypt:/letsencrypt:rw
       - /var/run/docker.sock:/var/run/docker.sock
+      #- ./traefik.yml:/traefik.yml:rw
     networks:
       - reverse-proxynet
+    labels:
+      - traefik.http.routers.http_catchall.rule=HostRegexp(`{any:.+}`) 
+      - traefik.http.routers.http_catchall.entrypoints=web 
+      - traefik.http.routers.http_catchall.middlewares=https_redirect
+      - traefik.http.middlewares.https_redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https_redirect.redirectscheme.permanent=true  
+      - traefik.http.middlewares.non_www.redirectregex.regex=^(http|https)?://(?:www\.)?(.+)
+      - traefik.http.middlewares.non_www.redirectregex.replacement=https://$${2} 
+      - traefik.http.middlewares.non_www.redirectregex.permanent=true
 networks:
   reverse-proxynet:
     name: reverse-proxynet

@@ -9,9 +9,9 @@
 ################################################################
 # Global configuration
 ################################################################
-global:
-  checkNewVersion: true
-  sendAnonymousUsage: true
+#global:
+#  checkNewVersion: true
+#  sendAnonymousUsage: true
 
 ################################################################
 # EntryPoints configuration
@@ -24,7 +24,6 @@ global:
 entryPoints:
   web:
     address: :80
-
   websecure:
     address: :443
 
@@ -94,13 +93,13 @@ entryPoints:
 #
 # Optional
 #
-#api:
+api:
   # Enable the API in insecure mode
   #
   # Optional
   # Default: false
   #
-#  insecure: true
+ insecure: true
 
   # Enabled Dashboard
   #
@@ -116,7 +115,7 @@ entryPoints:
 # Enable ping
 #ping:
   # Name of the related entry point
-  #
+  # 
   # Optional
   # Default: "traefik"
   #
@@ -126,15 +125,15 @@ entryPoints:
 # Docker configuration backend
 ################################################################
 
-#providers:
+providers:
   # Enable Docker configuration backend
-#  docker:
+ docker:
     # Docker server endpoint. Can be a tcp or a unix socket endpoint.
     #
     # Required
     # Default: "unix:///var/run/docker.sock"
     #
-#    endpoint: tcp://10.10.10.10:2375
+  #endpoint: "unix:///var/run/docker.sock"
 
     # Default host rule.
     #
@@ -148,4 +147,18 @@ entryPoints:
     # Optional
     # Default: true
     #
-#    exposedByDefault: false
+    exposedByDefault: true
+http:
+  middlewares:
+    redirect-www:
+      redirectRegex:
+        regex: "^https?://www\\.(.+)"
+        replacement: "https://${1}"
+        permanent: true
+certificatesResolvers:
+ myresolver:
+  acme:
+   httpchallenge:
+    entrypoint: web
+   email: zach@steelhead.design
+   storage: /letsencrypt.acme.json
