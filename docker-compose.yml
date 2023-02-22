@@ -9,14 +9,24 @@ services:
       - "--providers.docker.exposedbydefault=true"
       - "--entrypoints.web.address=:80"
       - "--entrypoints.websecure.address=:443"
+      - "--entryPoints.smtp.address=:25"
+      - "--entryPoints.smtp-ssl.address=:465"
+      - "--entryPoints.imap-ssl.address=:993"
+      - "--entryPoints.sieve.address=:4190"
+      - "--entryPoints.mysql.address=:3306"
       - "--certificatesresolvers.myresolver.acme.httpchallenge=true"
       - "--certificatesresolvers.myresolver.acme.httpchallenge.entrypoint=web"
       - "--certificatesresolvers.myresolver.acme.email=zach@steelhead.design"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
+      - "25:25"
+      - "465:465"
+      - "993:993"
+      - "4190:4190"
       - "8080:8080"
       - "80:80"
       - "443:443"
+      - "3306:3306"
     expose:
       - "22:22"
     env_file:
@@ -25,6 +35,7 @@ services:
       - ./letsencrypt:/letsencrypt:rw
       - /var/run/docker.sock:/var/run/docker.sock
       #- ./traefik.yml:/traefik.yml:rw
+    restart: always
     networks:
       - reverse-proxynet
     labels:
